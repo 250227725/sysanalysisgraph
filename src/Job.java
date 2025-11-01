@@ -4,8 +4,8 @@ public class Job {
     final int accelerationCost;
     final int availableAcceleration;
 
-    final int nextPickIndex;
-    final int previousPickIndex;
+    final int nextPeakIndex;
+    final int previousPeakIndex;
 
     public int getCurrentDuration() {
         return currentDuration;
@@ -13,14 +13,14 @@ public class Job {
 
     private int currentDuration;
 
-    public Job(String name, int defaultDuration, int accelerationCost, int availableAcceleration, int previousPickIndex, int nextPickIndex) {
+    public Job(String name, int defaultDuration, int accelerationCost, int availableAcceleration, int previousPeakIndex, int nextPeakIndex) {
         this.name = name;
         this.defaultDuration = defaultDuration;
         this.accelerationCost = accelerationCost;
         this.availableAcceleration = availableAcceleration;
         this.currentDuration = defaultDuration;
-        this.nextPickIndex = nextPickIndex;
-        this.previousPickIndex = previousPickIndex;
+        this.nextPeakIndex = nextPeakIndex;
+        this.previousPeakIndex = previousPeakIndex;
     }
 
     public boolean checkAcceleratability() {
@@ -48,6 +48,6 @@ public class Job {
     }
 
     public String getInfo() {
-        return "Route "+this.name+" from "+previousPickIndex+" to "+nextPickIndex+", duration: " + currentDuration;
+        return "Route "+this.name+" from "+ previousPeakIndex +" to "+ nextPeakIndex +", duration: " + currentDuration;
     }
 }

@@ -6,9 +6,9 @@ public class Main {
         int[] jobDuration = {5, 8, 4, 8, 10, 7, 6, 9, 4, 9, 7, 4};
         int[] jobAccelerationCost = {10, 3, 12, 3, 2, 4, 8, 3, 12, 3, 6, 12};
         int[] jobMaximumAcceleration = {2, 4, 1, 3, 5, 2, 3, 4, 1, 3, 2, 1};
-        int[][] jobPicks = {{0, 1}, {0, 2}, {1, 2}, {1, 3}, {1, 5}, {2, 4}, {4, 5}, {3, 6}, {5, 6}, {5, 7}, {4, 7}, {6, 7}};
+        int[][] jobPeaks = {{0, 1}, {0, 2}, {1, 2}, {1, 3}, {1, 5}, {2, 4}, {4, 5}, {3, 6}, {5, 6}, {5, 7}, {4, 7}, {6, 7}};
 
-        Graph graph = new Graph(jobName, jobDuration, jobAccelerationCost, jobMaximumAcceleration, jobPicks);
+        Graph graph = new Graph(jobName, jobDuration, jobAccelerationCost, jobMaximumAcceleration, jobPeaks);
 
 //        graph.printGraphInfo();
 
@@ -21,7 +21,7 @@ public class Main {
 
         boolean acceleratable = true;
         while (acceleratable) {
-            ArrayList<ArrayList<Job>> routesLkp = graph.recursiveCreateLkpList(graph.getPickQuantity() - 1, tp, new ArrayList<>(), new ArrayList<>());
+            ArrayList<ArrayList<Job>> routesLkp = graph.recursiveCreateLkpList(graph.getPeakQuantity() - 1, tp, new ArrayList<>(), new ArrayList<>());
             Optional<Job> accelerateJob = graph.selectJobToAccelerate(routesLkp);
             if (accelerateJob.isEmpty()) {
                 System.out.println("Nothing to improve");

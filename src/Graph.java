@@ -3,48 +3,48 @@ import java.util.stream.Collectors;
 
 public class Graph {
     public final ArrayList<Job> jobs = new ArrayList<>();
-    public final ArrayList<Pick> picks = new ArrayList<>();
+    public final ArrayList<Peak> peaks = new ArrayList<>();
 
-    private final int pickQuantity;
+    private final int peakQuantity;
 
     public Graph (String[] n, int[] j, int[] a, int[] dj, int[][] p) {
-        int maxPickIndex = 0;
+        int maxPeakIndex = 0;
         for (int[] job: p) {
-            maxPickIndex = Math.max(job[0], Math.max(job[1], maxPickIndex));
+            maxPeakIndex = Math.max(job[0], Math.max(job[1], maxPeakIndex));
         }
 
-        this.pickQuantity = maxPickIndex + 1;
+        this.peakQuantity = maxPeakIndex + 1;
 
         for (int i = 0; i < n.length; i++) {
             jobs.add(new Job(n[i], j[i], a[i], dj[i], p[i][0], p[i][1]));
         }
 
-        for (int i = 0; i < pickQuantity; i++) {
+        for (int i = 0; i < peakQuantity; i++) {
             ArrayList<Job> in = new ArrayList<>();
             ArrayList<Job> out = new ArrayList<>();
             for (Job job: jobs) {
-                if (job.nextPickIndex == i) {
+                if (job.nextPeakIndex == i) {
                     in.add(job);
                 }
-                if (job.previousPickIndex == i) {
+                if (job.previousPeakIndex == i) {
                     out.add(job);
                 }
             }
-            picks.add(new Pick("P"+i, in, out));
+            peaks.add(new Peak("P"+i, in, out));
         }
     }
 
-    public int getPickQuantity() {
-        return this.pickQuantity;
+    public int getPeakQuantity() {
+        return this.peakQuantity;
     }
 
     public int[] calculateTp() {
-        int[] tp = new int[this.getPickQuantity()];
+        int[] tp = new int[this.getPeakQuantity()];
         tp[0] = 0;
         for (int i = 1; i < tp.length; i++) {
             int route = 0;
-            for (Job job: picks.get(i).previousJobList) {
-                route = Math.max(route, (tp[job.previousPickIndex] + job.getCurrentDuration()));
+            for (Job job: peaks.get(i).previousJobList) {
+                route = Math.max(route, (tp[job.previousPeakIndex] + job.getCurrentDuration()));
             }
             tp[i] = route;
         }
@@ -52,13 +52,13 @@ public class Graph {
     }
 
     public int[] calculateTn(int lkp) {
-        int[] tn = new int[this.getPickQuantity()];
-        tn[picks.size()-1] = lkp;
+        int[] tn = new int[this.getPeakQuantity()];
+        tn[peaks.size()-1] = lkp;
 
         for (int i = tn.length-2; i >= 0; i--) {
             int route = lkp+1; //Guaranteed more than minimum
-            for (Job job: picks.get(i).nextJobList) {
-                route = Math.min(route, (tn[job.nextPickIndex] - job.getCurrentDuration()));
+            for (Job job: peaks.get(i).nextJobList) {
+                route = Math.min(route, (tn[job.nextPeakIndex] - job.getCurrentDuration()));
             }
             tn[i] = route;
         }
@@ -74,9 +74,9 @@ public class Graph {
             return routes;
         }
 
-        for (Job job: picks.get(index).previousJobList) {
+        for (Job job: peaks.get(index).previousJobList) {
 
-            int previousIndex = job.previousPickIndex;
+            int previousIndex = job.previousPeakIndex;
 
             if (job.getCurrentDuration() == tp[index]-tp[previousIndex]) {
                 ArrayList<Job> newRoute = new ArrayList<>(route);
@@ -92,8 +92,8 @@ public class Graph {
 
 
     public void printGraphInfo() {
-        for (Pick pick : this.picks) {
-            System.out.println(pick.getInfo());
+        for (Peak peak : this.peaks) {
+            System.out.println(peak.getInfo());
         }
 
         jobs.forEach(job -> System.out.println(job.getInfo()));

@@ -1,19 +1,19 @@
 import java.util.ArrayList;
 
-public class Pick {
+public class Peak {
     final String name;
     public final ArrayList<Job> previousJobList;
     public final ArrayList<Job> nextJobList;
 
 
-    public Pick(String name, ArrayList<Job> previousJobList, ArrayList<Job> nextJobList) {
+    public Peak(String name, ArrayList<Job> previousJobList, ArrayList<Job> nextJobList) {
         this.name = name;
         this.previousJobList = previousJobList;
         this.nextJobList = nextJobList;
     }
 
     public String getInfo() {
-        String result = "Pick name: " + name + "\n";
+        String result = "Peak name: " + name + "\n";
         if (!previousJobList.isEmpty()) {
             String inJobs = "";
             for (Job job: previousJobList) {
