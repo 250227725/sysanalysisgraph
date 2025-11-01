@@ -17,11 +17,12 @@ public class Main {
         int lkp = tp[tp.length - 1];
 //        int[] tn = graph.calculateTn(lkp);
 
-//        System.out.println("Total Day: " + lkp + ", current cost: " + totalCost);
+        System.out.println("Total Day: " + lkp + ", current cost: " + totalCost);
 
         boolean acceleratable = true;
         while (acceleratable) {
             ArrayList<ArrayList<Job>> routesLkp = graph.recursiveCreateLkpList(graph.getPeakQuantity() - 1, tp, new ArrayList<>(), new ArrayList<>());
+            graph.printCriticalRoutes(routesLkp);
             Optional<Job> accelerateJob = graph.selectJobToAccelerate(routesLkp);
             if (accelerateJob.isEmpty()) {
                 System.out.println("Nothing to improve");

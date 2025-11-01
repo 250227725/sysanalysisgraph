@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Graph {
+public final class Graph {
     public final ArrayList<Job> jobs = new ArrayList<>();
     public final ArrayList<Peak> peaks = new ArrayList<>();
 
@@ -99,6 +99,17 @@ public class Graph {
         jobs.forEach(job -> System.out.println(job.getInfo()));
     }
 
+    public void printCriticalRoutes(ArrayList<ArrayList<Job>> routes) {
+        for (ArrayList<Job> route: routes) {
+            StringBuilder stringRoute = new StringBuilder();
+            for (int i = route.size()-1; i > -1; i--) {
+                Job job = route.get(i);
+                stringRoute.append(job.getJobInfoForRoute(i == 0));
+            }
+            System.out.println(stringRoute);
+        }
+    }
+
     public Optional<Job> selectJobToAccelerate(ArrayList<ArrayList<Job>> routesLkp) {
         if (routesLkp.size()==1) {
             return routesLkp.get(0).stream()
@@ -169,7 +180,7 @@ public class Graph {
                     return flowJob;
                 }
 
-                if (emergencyFlag>30) { //Emergency exit for infinity loop
+                if (emergencyFlag>100) { //Emergency exit for infinity loop
                     isAllRotesBreak = true;
                 }
             }

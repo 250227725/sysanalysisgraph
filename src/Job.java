@@ -37,7 +37,23 @@ public class Job {
     }
 
     public String getName() {
-        return this.name;
+        return name;
+    }
+
+    public int getAccelerationCost() {
+        return accelerationCost;
+    }
+
+    public int getAvailableAcceleration() {
+        return defaultDuration-currentDuration;
+    }
+
+    public int getNextPeakIndex() {
+        return nextPeakIndex;
+    }
+
+    public int getPreviousPeakIndex() {
+        return previousPeakIndex;
     }
 
     public String getFullName() {
@@ -49,5 +65,22 @@ public class Job {
 
     public String getInfo() {
         return "Route "+this.name+" from "+ previousPeakIndex +" to "+ nextPeakIndex +", duration: " + currentDuration;
+    }
+
+
+    public String getJobInfoForRoute(boolean includeNextPeak) {
+        return "P"
+                + getPreviousPeakIndex()
+                + "--"
+                + getName()
+                + "("
+                + getCurrentDuration()
+                + (checkAcceleratability() ? "/"
+                + getAccelerationCost()
+                + "/"
+                + getAvailableAcceleration()
+                : "")
+                + ")-->"
+                + (includeNextPeak ? "P" + getNextPeakIndex() : "");
     }
 }
