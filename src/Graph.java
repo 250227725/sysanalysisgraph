@@ -1,5 +1,6 @@
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Scanner;
 
 public final class Graph {
     public final ArrayList<Job> jobs = new ArrayList<>();
@@ -111,81 +112,138 @@ public final class Graph {
     }
 
     public Optional<Job> selectJobToAccelerate(ArrayList<ArrayList<Job>> routesLkp) {
-        if (routesLkp.size()==1) {
-            return routesLkp.get(0).stream()
+        boolean MANUAL = true;
+        if (routesLkp.size()==1) { // If Critical route only One
+            List<Job> acceleratableJobs = routesLkp.get(0).stream()
                     .filter(Job::checkAcceleratability)
-                    .min(Comparator.comparingInt(job -> job.accelerationCost));
+                    .toList();
+
+            if (acceleratableJobs.isEmpty()) {
+                return Optional.empty();
+            } else if (acceleratableJobs.size() == 1) {
+                return Optional.of(acceleratableJobs.get(0));
+            } else {
+                // More than one true - find the one with minimal cost
+                return acceleratableJobs.stream()
+                        .min(Comparator.comparingInt(Job::getAccelerationCost));
+            }
         }
         else {
-            Set<Job> jobs = routesLkp.stream()
-                    .flatMap(ArrayList::stream) // Flatten all inner lists
-                    .collect(Collectors.toSet());
+            boolean allFalseListExists = routesLkp.stream()
+                    .anyMatch(route -> route.stream()
+                            .allMatch(job -> !job.checkAcceleratability()));
 
-            HashMap<Job, Integer> directFlow = new HashMap<>();
-            HashMap<Job, Integer> reverseFlow = new HashMap<>();
+            if (allFalseListExists) {
+                return Optional.empty();
+            } else if (MANUAL) {
+                return manualSelectJobToAccelerate(routesLkp);
+            } else {
+                Set<Job> jobs = routesLkp.stream()
+                        .flatMap(ArrayList::stream) // Flatten all inner lists
+                        .collect(Collectors.toSet());
 
-            for (Job job: jobs) {
-                directFlow.put(job, job.checkAcceleratability() ? job.accelerationCost : 1000);
-                reverseFlow.put(job, 0);
-            }
+                HashMap<Job, Integer> directFlow = new HashMap<>();
+                HashMap<Job, Integer> reverseFlow = new HashMap<>();
 
-            boolean isAllRotesBreak = false;
-
-            int emergencyFlag = 0;
-
-            while (!isAllRotesBreak) {
-                emergencyFlag++;
-                // Iteration
-                Optional<Job> flowJob = directFlow.entrySet().stream()
-                        .filter(k -> k.getValue() > 0 && k.getValue() < 1000)
-                        .min(Map.Entry.comparingByValue())
-                        .map(Map.Entry::getKey);
-
-                if (flowJob.isEmpty()) return Optional.empty();
-
-                Set<Job> updateJobs = routesLkp.stream()
-                        .filter(route -> route.contains(flowJob.get()))  // Filter routes that contain seekingJob
-                        .flatMap(ArrayList::stream)                   // Flatten all jobs from matching routes
-                        .collect(Collectors.toCollection(HashSet::new)); // Collect to ArrayList
-
-                int decreaseFlow = directFlow.get(flowJob.get());
-
-                for (Job job : updateJobs) {
-                    int direct = directFlow.get(job);
-                    int newDirect = direct < 1000 ? direct - decreaseFlow : direct;
-
-                    int reverse = reverseFlow.get(job);
-                    int newReverse = direct < 1000 ? reverse + decreaseFlow : reverse;
-
-                    directFlow.put(job, newDirect);
-                    reverseFlow.put(job, newReverse);
+                for (Job job : jobs) {
+                    directFlow.put(job, job.checkAcceleratability() ? job.accelerationCost : 1000);
+                    reverseFlow.put(job, 0);
                 }
 
-                isAllRotesBreak = true;
-                for (ArrayList<Job> route : routesLkp) {
-                    boolean isRouteBreak = false;
-                    for (Job job : route) {
-                        if (directFlow.get(job) == 0) {
-                            isRouteBreak = true;
+                boolean isAllRotesBreak = false;
+
+                int emergencyFlag = 0;
+
+                while (!isAllRotesBreak) {
+                    emergencyFlag++;
+                    // Iteration
+                    Optional<Job> flowJob = directFlow.entrySet().stream()
+                            .filter(k -> k.getValue() > 0 && k.getValue() < 1000)
+                            .min(Map.Entry.comparingByValue())
+                            .map(Map.Entry::getKey);
+
+                    if (flowJob.isEmpty()) return Optional.empty();
+
+                    Set<Job> updateJobs = routesLkp.stream()
+                            .filter(route -> route.contains(flowJob.get()))  // Filter routes that contain seekingJob
+                            .flatMap(ArrayList::stream)                   // Flatten all jobs from matching routes
+                            .collect(Collectors.toCollection(HashSet::new)); // Collect to ArrayList
+
+                    int decreaseFlow = directFlow.get(flowJob.get());
+
+                    for (Job job : updateJobs) {
+                        int direct = directFlow.get(job);
+                        int newDirect = direct < 1000 ? direct - decreaseFlow : direct;
+
+                        int reverse = reverseFlow.get(job);
+                        int newReverse = direct < 1000 ? reverse + decreaseFlow : reverse;
+
+                        directFlow.put(job, newDirect);
+                        reverseFlow.put(job, newReverse);
+                    }
+
+                    isAllRotesBreak = true;
+                    for (ArrayList<Job> route : routesLkp) {
+                        boolean isRouteBreak = false;
+                        for (Job job : route) {
+                            if (directFlow.get(job) == 0) {
+                                isRouteBreak = true;
+                                break;
+                            }
+                        }
+                        if (!isRouteBreak) {
+                            isAllRotesBreak = false;
                             break;
                         }
                     }
-                    if (!isRouteBreak) {
-                        isAllRotesBreak = false;
-                        break;
+
+                    if (isAllRotesBreak) {
+                        return flowJob;
                     }
-                }
 
-                if (isAllRotesBreak) {
-                    return flowJob;
-                }
-
-                if (emergencyFlag>100) { //Emergency exit for infinity loop
-                    isAllRotesBreak = true;
+                    if (emergencyFlag > 100) { //Emergency exit for infinity loop
+                        isAllRotesBreak = true;
+                    }
                 }
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<Job> manualSelectJobToAccelerate(ArrayList<ArrayList<Job>> routesLkp) {
+        HashMap<String, Job> jobMap = routesLkp.stream()
+                .flatMap(List::stream) // flatten the nested lists into a single stream of Job objects
+                .filter(Job::checkAcceleratability) //Only available to accelerate
+                .collect(Collectors.toMap(
+                        Job::getShortName,  // key mapper: use getShortName() for keys
+                        job -> job,         // value mapper: Job object itself
+                        (existing, replacement) -> existing, // merge function: keep the existing value in case of duplicates
+                        HashMap::new        // supplier: create a new HashMap
+                ));
+
+        if (jobMap.isEmpty()) {
+            return Optional.empty(); //Nothing to accelerate
+        } else if (jobMap.size() == 1) {
+            for (Job value : jobMap.values()) {
+                return Optional.of(value);
+            }
+        }
+
+
+        while (true) {
+            System.out.println("Enter letter name of job or stop to stop accelerating");
+            Scanner scanner = new Scanner(System.in);
+            String userInput = scanner.nextLine();
+            if (userInput.equals("stop")) {
+                return Optional.empty();
+            }
+            if (!jobMap.containsKey(userInput)) {
+                System.out.println("Job hasn't found");
+            }
+            else {
+                return Optional.of(jobMap.get(userInput));
+            }
+        }
     }
 
 }

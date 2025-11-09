@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        String[] jobName = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
+        String[] jobName = {"A{1}", "B{2}", "C{3}", "D{4}", "E{5}", "F{6}", "G{7}", "H{8}", "I{9}", "J{10}", "K{11}", "L{12}"};
         int[] jobDuration = {5, 8, 4, 8, 10, 7, 6, 9, 4, 9, 7, 4};
         int[] jobAccelerationCost = {10, 3, 12, 3, 2, 4, 8, 3, 12, 3, 6, 12};
         int[] jobMaximumAcceleration = {2, 4, 1, 3, 5, 2, 3, 4, 1, 3, 2, 1};
@@ -21,11 +21,12 @@ public class Main {
 
         boolean acceleratable = true;
         while (acceleratable) {
+            System.out.println("Tp:" + Arrays.toString(graph.calculateTp()));
             ArrayList<ArrayList<Job>> routesLkp = graph.recursiveCreateLkpList(graph.getPeakQuantity() - 1, tp, new ArrayList<>(), new ArrayList<>());
             graph.printCriticalRoutes(routesLkp);
             Optional<Job> accelerateJob = graph.selectJobToAccelerate(routesLkp);
             if (accelerateJob.isEmpty()) {
-                System.out.println("Nothing to improve");
+                System.out.println("Nothing to accelerate");
                 acceleratable = false;
             }
             else {

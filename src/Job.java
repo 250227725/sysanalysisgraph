@@ -45,7 +45,7 @@ public class Job {
     }
 
     public int getAvailableAcceleration() {
-        return defaultDuration-currentDuration;
+        return availableAcceleration+currentDuration - defaultDuration;
     }
 
     public int getNextPeakIndex() {
@@ -73,6 +73,7 @@ public class Job {
                 + getPreviousPeakIndex()
                 + "--"
                 + getName()
+                + "[" + getPreviousPeakIndex() + "," + getNextPeakIndex() + "]"
                 + "("
                 + getCurrentDuration()
                 + (checkAcceleratability() ? "/"
@@ -82,5 +83,9 @@ public class Job {
                 : "")
                 + ")-->"
                 + (includeNextPeak ? "P" + getNextPeakIndex() : "");
+    }
+
+    public String getShortName() {
+        return name.substring(0,1);
     }
 }
